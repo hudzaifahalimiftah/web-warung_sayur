@@ -3,7 +3,9 @@
 
 @section('content')
 <div class="max-w-3xl mx-auto px-4 py-10">
-    <div class="flex items-center gap-3 mb-8">
+
+    {{-- Header --}}
+    <div class="flex items-center gap-3 mb-6">
         <a href="{{ route('orders.history') }}"
            class="flex items-center gap-1 text-gray-400 hover:text-gray-600 transition-colors text-sm">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -11,42 +13,145 @@
             </svg>
             Kembali
         </a>
-        <h1 class="text-2xl font-bold text-gray-800">Detail Pesanan #{{ $order->id }}</h1>
+        <h1 class="text-xl font-bold text-gray-800">Pesanan #{{ str_pad($order->id, 4, '0', STR_PAD_LEFT) }}</h1>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-4">
-        <div class="flex items-center justify-between mb-6">
-            <div>
-                <p class="text-sm text-gray-400">Tanggal Pesanan</p>
-                <p class="font-medium text-gray-700">{{ $order->created_at->format('d M Y, H:i') }}</p>
+    {{-- ===== ORDER TRACKING ===== --}}
+    @php
+        $steps = [
+            'pending'    => ['label' => 'Menunggu Konfirmasi', 'desc' => 'Pesanan diterima, menunggu konfirmasi pembayaran dari admin.'],
+            'confirmed'  => ['label' => 'Dikonfirmasi',        'desc' => 'Pembayaran dikonfirmasi. Pesanan sedang disiapkan.'],
+            'processing' => ['label' => 'Sedang Diproses',     'desc' => 'Sayuran sedang dipilih dan dikemas untuk Anda.'],
+            'delivered'  => ['label' => 'Dalam Pengiriman',    'desc' => 'Pesanan sedang dalam perjalanan ke alamat Anda.'],
+            'completed'  => ['label' => 'Selesai',             'desc' => 'Pesanan telah diterima. Terima kasih sudah berbelanja!'],
+        ];
+        $stepOrder  = ['pending', 'confirmed', 'processing', 'delivered', 'completed'];
+        $currentIdx = array_search($order->status, $stepOrder);
+        $isCancelled = $order->status === 'cancelled';
+    @endphp
+
+    @if($isCancelled)
+        {{-- Cancelled state --}}
+        <div class="bg-red-50 border border-red-200 rounded-2xl p-5 mb-5 flex items-center gap-4">
+            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
             </div>
-            @php
-                $badge = match($order->status) {
-                    'completed'  => 'bg-green-100 text-green-700',
-                    'delivered'  => 'bg-cyan-100 text-cyan-700',
-                    'cancelled'  => 'bg-red-100 text-red-700',
-                    'pending'    => 'bg-yellow-100 text-yellow-700',
-                    'confirmed'  => 'bg-blue-100 text-blue-700',
-                    'processing' => 'bg-violet-100 text-violet-700',
-                    default      => 'bg-gray-100 text-gray-600',
-                };
-            @endphp
-            <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold {{ $badge }}">
-                {{ $order->status_label }}
-            </span>
+            <div>
+                <p class="font-bold text-red-700">Pesanan Dibatalkan</p>
+                <p class="text-sm text-red-500 mt-0.5">Pesanan ini telah dibatalkan. Stok produk sudah dikembalikan.</p>
+            </div>
+        </div>
+    @else
+        {{-- Step tracker --}}
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-5">
+            <h2 class="font-bold text-gray-800 mb-5 text-sm">Status Pesanan</h2>
+            <div class="relative">
+                {{-- Line background --}}
+                <div class="absolute top-5 left-5 right-5 h-0.5 bg-gray-100" style="z-index:0"></div>
+                {{-- Line progress --}}
+                @if($currentIdx !== false && $currentIdx > 0)
+                    <div class="absolute top-5 left-5 h-0.5 bg-green-500 transition-all" style="z-index:1; width: calc({{ ($currentIdx / (count($stepOrder)-1)) * 100 }}% - 20px)"></div>
+                @endif
+
+                <div class="relative flex justify-between" style="z-index:2">
+                    @foreach($stepOrder as $i => $stepKey)
+                        @php
+                            $isDone    = $currentIdx !== false && $i < $currentIdx;
+                            $isCurrent = $currentIdx !== false && $i === $currentIdx;
+                            $isFuture  = $currentIdx === false || $i > $currentIdx;
+                        @endphp
+                        <div class="flex flex-col items-center gap-2 flex-1">
+                            {{-- Circle --}}
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all
+                                {{ $isDone    ? 'bg-green-500 border-green-500' : '' }}
+                                {{ $isCurrent ? 'bg-white border-green-500 shadow-md shadow-green-100' : '' }}
+                                {{ $isFuture  ? 'bg-white border-gray-200' : '' }}">
+                                @if($isDone)
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                @elseif($isCurrent)
+                                    <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                                @else
+                                    <div class="w-2.5 h-2.5 bg-gray-200 rounded-full"></div>
+                                @endif
+                            </div>
+                            {{-- Label --}}
+                            <p class="text-[10px] text-center leading-tight font-medium
+                                {{ $isDone    ? 'text-green-600' : '' }}
+                                {{ $isCurrent ? 'text-green-700 font-bold' : '' }}
+                                {{ $isFuture  ? 'text-gray-300' : '' }}">
+                                {{ $steps[$stepKey]['label'] }}
+                            </p>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- Deskripsi status saat ini --}}
+            @if($currentIdx !== false)
+                <div class="mt-5 pt-4 border-t border-gray-100">
+                    <p class="text-sm text-gray-600 text-center">
+                        {{ $steps[$stepOrder[$currentIdx]]['desc'] }}
+                    </p>
+                    {{-- Countdown hanya untuk pending --}}
+                    @if($order->status === 'pending')
+                        @php
+                            $deadline  = $order->created_at->addHours(24);
+                            $remaining = now()->diffInSeconds($deadline, false);
+                        @endphp
+                        @if($remaining > 0)
+                            <div class="flex items-center justify-center gap-2 mt-3">
+                                <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span class="text-xs text-amber-600">Batas konfirmasi:</span>
+                                <span class="font-mono font-bold text-sm text-amber-700 bg-amber-50 px-2 py-0.5 rounded-lg"
+                                      id="countdown" data-deadline="{{ $deadline->toIso8601String() }}">--:--:--</span>
+                            </div>
+                        @else
+                            <p class="text-center text-xs text-red-500 mt-2 font-medium">Waktu konfirmasi habis</p>
+                        @endif
+                    @endif
+                    {{-- Pesan selesai --}}
+                    @if($order->status === 'completed')
+                        <div class="flex items-center justify-center gap-2 mt-3">
+                            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span class="text-sm text-green-600 font-semibold">Pesanan selesai! Terima kasih sudah berbelanja.</span>
+                        </div>
+                    @endif
+                </div>
+            @endif
+        </div>
+    @endif
+
+    {{-- Info Pesanan --}}
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-4">
+        <div class="flex items-center justify-between mb-5">
+            <div>
+                <p class="text-xs text-gray-400">Tanggal Pesanan</p>
+                <p class="font-semibold text-gray-700 text-sm">{{ $order->created_at->format('d M Y, H:i') }}</p>
+            </div>
+            <div class="text-right">
+                <p class="text-xs text-gray-400">Penerima</p>
+                <p class="font-semibold text-gray-700 text-sm">{{ $order->recipient_name ?? $order->user->name }}</p>
+            </div>
         </div>
 
-        <div class="mb-6">
-            <p class="text-sm font-medium text-gray-500 mb-1">Alamat Pengiriman</p>
-            <p class="text-gray-700">{{ $order->shipping_address }}</p>
+        <div class="mb-5">
+            <p class="text-xs font-medium text-gray-400 mb-1">Alamat Pengiriman</p>
+            <p class="text-gray-700 text-sm">{{ $order->shipping_address }}</p>
         </div>
 
         <div class="border-t border-gray-100 pt-5">
-            <h3 class="font-semibold text-gray-700 mb-4">Item Pesanan</h3>
+            <h3 class="font-semibold text-gray-700 mb-4 text-sm">Item Pesanan</h3>
             <div class="space-y-3">
                 @foreach($order->items as $item)
                     <div class="flex items-center gap-3">
-                        {{-- Gambar produk asli --}}
                         <div class="w-12 h-12 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
                             <img src="{{ $item->product->image_url }}"
                                  alt="{{ $item->product->product_name }}"
@@ -68,6 +173,7 @@
         </div>
     </div>
 
+    {{-- Tombol WA hanya untuk pending --}}
     @if($order->status === 'pending')
         <a href="{{ $waUrl }}" target="_blank"
            class="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl transition-colors shadow-sm">
@@ -77,5 +183,26 @@
             Konfirmasi Pembayaran via WhatsApp
         </a>
     @endif
+
 </div>
+
+@push('scripts')
+<script>
+const el = document.getElementById('countdown');
+if (el) {
+    const deadline = new Date(el.dataset.deadline);
+    function tick() {
+        const diff = deadline - new Date();
+        if (diff <= 0) { el.textContent = 'Waktu habis'; el.classList.add('text-red-600','bg-red-50'); return; }
+        const h = Math.floor(diff/3600000);
+        const m = Math.floor((diff%3600000)/60000);
+        const s = Math.floor((diff%60000)/1000);
+        el.textContent = String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+        if (h < 1) el.classList.add('text-red-600','bg-red-50');
+    }
+    tick();
+    setInterval(tick, 1000);
+}
+</script>
+@endpush
 @endsection

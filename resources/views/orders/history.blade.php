@@ -61,7 +61,7 @@
                         @endif
                     </div>
 
-                    {{-- Countdown untuk pesanan pending --}}
+                    {{-- Info status untuk non-pending --}}
                     @if($order->status === 'pending')
                         @php
                             $deadline = $order->created_at->addHours(24);
@@ -86,6 +86,34 @@
                                 <span class="text-xs text-red-600 font-medium">Waktu konfirmasi habis — pesanan akan segera dibatalkan</span>
                             </div>
                         @endif
+                    @elseif($order->status === 'confirmed')
+                        <div class="flex items-center gap-2 mb-3 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2">
+                            <svg class="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span class="text-xs text-blue-700 font-medium">Pembayaran dikonfirmasi. Pesanan sedang disiapkan.</span>
+                        </div>
+                    @elseif($order->status === 'processing')
+                        <div class="flex items-center gap-2 mb-3 bg-violet-50 border border-violet-100 rounded-xl px-3 py-2">
+                            <svg class="w-4 h-4 text-violet-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                            </svg>
+                            <span class="text-xs text-violet-700 font-medium">Sayuran sedang dikemas untuk Anda.</span>
+                        </div>
+                    @elseif($order->status === 'delivered')
+                        <div class="flex items-center gap-2 mb-3 bg-cyan-50 border border-cyan-100 rounded-xl px-3 py-2">
+                            <svg class="w-4 h-4 text-cyan-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/>
+                            </svg>
+                            <span class="text-xs text-cyan-700 font-medium">Pesanan sedang dalam perjalanan ke alamat Anda.</span>
+                        </div>
+                    @elseif($order->status === 'completed')
+                        <div class="flex items-center gap-2 mb-3 bg-green-50 border border-green-100 rounded-xl px-3 py-2">
+                            <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span class="text-xs text-green-700 font-medium">Pesanan selesai! Terima kasih sudah berbelanja.</span>
+                        </div>
                     @endif
 
                     <div class="flex items-center justify-between pt-3 border-t border-gray-50">
