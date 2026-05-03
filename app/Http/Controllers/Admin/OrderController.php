@@ -27,6 +27,12 @@ class OrderController extends Controller
         return view('admin.orders.show', compact('order'));
     }
 
+    public function print(Order $order)
+    {
+        $order->load('user', 'items.product');
+        return view('admin.orders.print', compact('order'));
+    }
+
     public function updateStatus(Request $request, Order $order)
     {
         // Status final tidak bisa diubah

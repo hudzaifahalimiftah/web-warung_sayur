@@ -72,6 +72,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Orders
     Route::get('/pesanan', [Admin\OrderController::class, 'index'])->name('orders.index');
     Route::get('/pesanan/{order}', [Admin\OrderController::class, 'show'])->name('orders.show');
+    Route::get('/pesanan/{order}/print', [Admin\OrderController::class, 'print'])->name('orders.print');
     Route::patch('/pesanan/{order}/status', [Admin\OrderController::class, 'updateStatus'])->name('orders.updateStatus');
 
     // Reports

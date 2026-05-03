@@ -15,8 +15,8 @@ class ReportController extends Controller
         $year  = $request->get('year', date('Y'));
         $month = $request->get('month', date('m'));
 
-        // Pemasukan per hari dalam bulan yang dipilih
-        $dailyRevenue = Order::whereIn('status', ['confirmed', 'processing', 'delivered', 'completed'])
+        // Pemasukan per hari — semua pesanan kecuali cancelled
+        $dailyRevenue = Order::whereNotIn('status', ['cancelled'])
             ->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
             ->select(
@@ -29,7 +29,7 @@ class ReportController extends Controller
             ->get()
             ->keyBy('day');
 
-        // Total bulan ini
+        // Total bulan ini (confirmed ke atas)
         $monthlyRevenue = Order::whereIn('status', ['confirmed', 'processing', 'delivered', 'completed'])
             ->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
@@ -45,20 +45,12 @@ class ReportController extends Controller
             ->whereMonth('created_at', $month)
             ->count();
 
-        // Pemasukan hari ini (real-time, selalu hari ini)
-        $todayRevenue = Order::whereIn('status', ['confirmed', 'processing', 'delivered', 'completed'])
+        // Hari ini
+        $todayRevenue = Order::whereNotIn('status', ['cancelled'])
             ->whereDate('created_at', today())
             ->sum('total_price');
 
         $todayOrders = Order::whereDate('created_at', today())->count();
-
-        // Semua pesanan bulan ini (detail)
-        $orders = Order::with('user')
-            ->whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->latest()
-            ->paginate(20)
-            ->withQueryString();
 
         // Ringkasan per bulan (tahun ini)
         $yearlyData = Order::whereIn('status', ['confirmed', 'processing', 'delivered', 'completed'])
@@ -88,7 +80,7 @@ class ReportController extends Controller
 
         return view('admin.reports.index', compact(
             'dailyRevenue', 'monthlyRevenue', 'monthlyOrders',
-            'newCustomers', 'orders', 'yearlyData',
+            'newCustomers', 'yearlyData',
             'year', 'month', 'availableYears', 'daysInMonth',
             'todayRevenue', 'todayOrders'
         ));
