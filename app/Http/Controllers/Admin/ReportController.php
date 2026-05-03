@@ -45,6 +45,13 @@ class ReportController extends Controller
             ->whereMonth('created_at', $month)
             ->count();
 
+        // Pemasukan hari ini (real-time, selalu hari ini)
+        $todayRevenue = Order::whereIn('status', ['confirmed', 'processing', 'delivered', 'completed'])
+            ->whereDate('created_at', today())
+            ->sum('total_price');
+
+        $todayOrders = Order::whereDate('created_at', today())->count();
+
         // Semua pesanan bulan ini (detail)
         $orders = Order::with('user')
             ->whereYear('created_at', $year)
@@ -82,7 +89,8 @@ class ReportController extends Controller
         return view('admin.reports.index', compact(
             'dailyRevenue', 'monthlyRevenue', 'monthlyOrders',
             'newCustomers', 'orders', 'yearlyData',
-            'year', 'month', 'availableYears', 'daysInMonth'
+            'year', 'month', 'availableYears', 'daysInMonth',
+            'todayRevenue', 'todayOrders'
         ));
     }
 }
