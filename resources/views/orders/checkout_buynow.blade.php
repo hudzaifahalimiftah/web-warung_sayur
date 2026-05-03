@@ -1,24 +1,15 @@
 @extends('layouts.app')
-@section('title', 'Checkout')
+@section('title', 'Beli Sekarang')
 
 @section('content')
 <div class="max-w-4xl mx-auto px-4 py-10">
-
-    <div class="flex items-center gap-3 mb-8">
-        <div class="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-            </svg>
-        </div>
-        <h1 class="text-2xl font-bold text-gray-800">Checkout</h1>
-    </div>
+    <h1 class="text-2xl font-bold text-gray-800 mb-8">Beli Sekarang</h1>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
         {{-- Form Pengiriman --}}
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
             <h2 class="font-bold text-gray-800 text-lg mb-5">Informasi Pengiriman</h2>
-            <form method="POST" action="{{ route('orders.store') }}">
+            <form method="POST" action="{{ route('orders.store.buynow') }}">
                 @csrf
                 <div class="space-y-4">
                     <div>
@@ -41,20 +32,12 @@
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-
-                    <div class="bg-green-50 border border-green-100 rounded-xl p-4 text-sm text-green-800 flex items-start gap-3">
-                        <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                        </svg>
-                        <div>
-                            <p class="font-semibold mb-0.5">Konfirmasi via WhatsApp</p>
-                            <p class="text-green-700 text-xs">Setelah checkout, Anda akan diarahkan ke WhatsApp Admin untuk konfirmasi pembayaran.</p>
-                        </div>
+                    <div class="bg-green-50 border border-green-100 rounded-xl p-4 text-sm text-green-800">
+                        Setelah checkout, Anda akan diarahkan ke WhatsApp Admin untuk konfirmasi pembayaran.
                     </div>
-
                     <button type="submit"
                             class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-sm hover:shadow-md">
-                        Buat Pesanan & Konfirmasi via WA
+                        Pesan Sekarang
                     </button>
                 </div>
             </form>
@@ -63,23 +46,21 @@
         {{-- Ringkasan --}}
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
             <h2 class="font-bold text-gray-800 text-lg mb-5">Ringkasan Pesanan</h2>
-            <div class="space-y-3 mb-5">
-                @foreach($cartItems as $item)
-                    <div class="flex items-center gap-3">
-                        {{-- Gambar produk asli --}}
-                        <div class="w-12 h-12 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
-                            <img src="{{ $item->product->image_url }}"
-                                 alt="{{ $item->product->product_name }}"
-                                 class="w-full h-full object-cover"
-                                 onerror="this.src='https://images.unsplash.com/photo-1540420773420-3366772f4999?w=100&q=80'">
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-semibold text-gray-800 truncate">{{ $item->product->product_name }}</p>
-                            <p class="text-xs text-gray-400">{{ $item->quantity }} {{ $item->product->unit }} × Rp {{ number_format($item->product->price, 0, ',', '.') }}</p>
-                        </div>
-                        <span class="text-sm font-bold text-gray-700 flex-shrink-0">Rp {{ number_format($item->quantity * $item->product->price, 0, ',', '.') }}</span>
-                    </div>
-                @endforeach
+            <div class="flex items-center gap-4 mb-5">
+                <div class="w-20 h-20 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+                    <img src="{{ $product->image_url }}"
+                         alt="{{ $product->product_name }}"
+                         class="w-full h-full object-cover"
+                         onerror="this.src='https://images.unsplash.com/photo-1540420773420-3366772f4999?w=200&q=80'">
+                </div>
+                <div>
+                    <p class="font-semibold text-gray-800">{{ $product->product_name }}</p>
+                    <p class="text-sm text-gray-400">{{ $product->category->category_name }}</p>
+                    <p class="text-sm text-green-600 font-semibold mt-1">
+                        Rp {{ number_format($product->price, 0, ',', '.') }} / {{ $product->unit }}
+                    </p>
+                    <p class="text-sm text-gray-500 mt-0.5">Jumlah: {{ $quantity }} {{ $product->unit }}</p>
+                </div>
             </div>
             <div class="border-t border-gray-100 pt-4">
                 <div class="flex justify-between font-bold text-gray-800 text-xl">

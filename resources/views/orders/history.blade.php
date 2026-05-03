@@ -3,28 +3,51 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto px-4 py-10">
-    <h1 class="text-2xl font-bold text-gray-800 mb-8">📦 Riwayat Pesanan</h1>
+
+    <div class="flex items-center gap-3 mb-8">
+        <div class="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+        </div>
+        <h1 class="text-2xl font-bold text-gray-800">Riwayat Pesanan</h1>
+    </div>
 
     @if($orders->isEmpty())
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-16 text-center">
-            <div class="text-5xl mb-3">📦</div>
-            <p class="text-gray-500">Belum ada pesanan.</p>
-            <a href="{{ route('products.index') }}" class="mt-4 inline-block text-primary-600 hover:underline text-sm">Mulai belanja →</a>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 py-20 text-center">
+            <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+            </div>
+            <p class="text-gray-500 font-medium mb-1">Belum ada pesanan</p>
+            <p class="text-gray-400 text-sm mb-5">Yuk mulai belanja sayur segar!</p>
+            <a href="{{ route('products.index') }}"
+               class="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">
+                Mulai Belanja
+            </a>
         </div>
     @else
         <div class="space-y-4">
             @foreach($orders as $order)
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
                     <div class="flex items-start justify-between mb-4">
                         <div>
                             <p class="font-semibold text-gray-800">Pesanan #{{ $order->id }}</p>
-                            <p class="text-sm text-gray-400">{{ $order->created_at->format('d M Y, H:i') }}</p>
+                            <p class="text-sm text-gray-400 mt-0.5">{{ $order->created_at->format('d M Y, H:i') }}</p>
                         </div>
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
-                            @if($order->status === 'delivered') bg-green-100 text-green-700
-                            @elseif($order->status === 'cancelled') bg-red-100 text-red-700
-                            @elseif($order->status === 'pending') bg-yellow-100 text-yellow-700
-                            @else bg-blue-100 text-blue-700 @endif">
+                        @php
+                            $badge = match($order->status) {
+                                'completed'  => 'bg-green-100 text-green-700',
+                                'delivered'  => 'bg-cyan-100 text-cyan-700',
+                                'cancelled'  => 'bg-red-100 text-red-700',
+                                'pending'    => 'bg-yellow-100 text-yellow-700',
+                                'confirmed'  => 'bg-blue-100 text-blue-700',
+                                'processing' => 'bg-violet-100 text-violet-700',
+                                default      => 'bg-gray-100 text-gray-600',
+                            };
+                        @endphp
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {{ $badge }}">
                             {{ $order->status_label }}
                         </span>
                     </div>
@@ -38,9 +61,42 @@
                         @endif
                     </div>
 
-                    <div class="flex items-center justify-between">
-                        <span class="font-bold text-primary-600">Rp {{ number_format($order->total_price, 0, ',', '.') }}</span>
-                        <a href="{{ route('orders.show', $order) }}" class="text-sm text-primary-600 hover:underline font-medium">Lihat Detail →</a>
+                    {{-- Countdown untuk pesanan pending --}}
+                    @if($order->status === 'pending')
+                        @php
+                            $deadline = $order->created_at->addHours(24);
+                            $remaining = now()->diffInSeconds($deadline, false);
+                        @endphp
+                        @if($remaining > 0)
+                            <div class="flex items-center gap-2 mb-3 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2">
+                                <svg class="w-4 h-4 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span class="text-xs text-amber-700">Batas konfirmasi:</span>
+                                <span class="font-mono font-bold text-xs text-amber-700 countdown-timer"
+                                      data-deadline="{{ $deadline->toIso8601String() }}">
+                                    --:--:--
+                                </span>
+                            </div>
+                        @else
+                            <div class="flex items-center gap-2 mb-3 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
+                                <svg class="w-4 h-4 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span class="text-xs text-red-600 font-medium">Waktu konfirmasi habis — pesanan akan segera dibatalkan</span>
+                            </div>
+                        @endif
+                    @endif
+
+                    <div class="flex items-center justify-between pt-3 border-t border-gray-50">
+                        <span class="font-bold text-green-600">Rp {{ number_format($order->total_price, 0, ',', '.') }}</span>
+                        <a href="{{ route('orders.show', $order) }}"
+                           class="text-sm text-green-600 hover:text-green-700 font-semibold flex items-center gap-1">
+                            Lihat Detail
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
                     </div>
                 </div>
             @endforeach
@@ -48,4 +104,30 @@
         <div class="mt-6">{{ $orders->links() }}</div>
     @endif
 </div>
+
+@push('scripts')
+<script>
+// Countdown untuk semua pesanan pending di halaman riwayat
+document.querySelectorAll('.countdown-timer').forEach(function(el) {
+    const deadline = new Date(el.dataset.deadline);
+
+    function tick() {
+        const diff = deadline - new Date();
+        if (diff <= 0) {
+            el.textContent = 'Waktu habis';
+            el.classList.add('text-red-600');
+            return;
+        }
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        el.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+        if (h < 1) el.classList.add('text-red-600');
+    }
+
+    tick();
+    setInterval(tick, 1000);
+});
+</script>
+@endpush
 @endsection

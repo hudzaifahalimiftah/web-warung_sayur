@@ -11,6 +11,8 @@ class Order extends Model
         'total_price',
         'status',
         'shipping_address',
+        'recipient_name',
+        'recipient_phone',
     ];
 
     protected $casts = [
@@ -32,8 +34,9 @@ class Order extends Model
         return match ($this->status) {
             'pending'    => 'Menunggu Konfirmasi',
             'confirmed'  => 'Dikonfirmasi',
-            'processing' => 'Diproses',
-            'delivered'  => 'Dikirim',
+            'processing' => 'Sedang Diproses',
+            'delivered'  => 'Sudah Dikirim',
+            'completed'  => 'Selesai',
             'cancelled'  => 'Dibatalkan',
             default      => $this->status,
         };
@@ -45,7 +48,8 @@ class Order extends Model
             'pending'    => 'yellow',
             'confirmed'  => 'blue',
             'processing' => 'indigo',
-            'delivered'  => 'green',
+            'delivered'  => 'cyan',
+            'completed'  => 'green',
             'cancelled'  => 'red',
             default      => 'gray',
         };

@@ -26,12 +26,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
+        html, body { overflow-x: hidden; }
         .line-clamp-2 { display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; }
         .line-clamp-1 { display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden; }
-        .dropdown-menu { transition: opacity 0.15s ease, transform 0.15s ease; transform: translateY(-4px); }
-        .group:hover .dropdown-menu { opacity:1!important;visibility:visible!important;transform:translateY(0); }
-        .flash-msg { animation: fadeOut 0.5s ease 4s forwards; }
-        @keyframes fadeOut { to { opacity:0;pointer-events:none; } }
     </style>
     @stack('styles')
 </head>
@@ -72,7 +69,8 @@
             {{-- Right --}}
             <div class="flex items-center gap-2 ml-auto">
                 @auth
-                    {{-- Cart --}}
+                    {{-- Cart — hanya untuk user biasa --}}
+                    @if(!auth()->user()->isAdmin())
                     <a href="{{ route('cart.index') }}"
                        class="relative flex items-center gap-1.5 text-gray-600 hover:text-green-600 transition-colors px-3 py-2 rounded-lg hover:bg-green-50 text-sm font-medium">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -84,10 +82,12 @@
                             <span class="absolute -top-0.5 left-4 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">{{ $cartCount }}</span>
                         @endif
                     </a>
+                    @endif
 
                     {{-- User Dropdown --}}
-                    <div class="relative group">
-                        <button class="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white pl-3 pr-3 py-2 rounded-xl font-semibold transition-colors text-sm">
+                    <div class="relative" id="userDropdownWrap">
+                        <button onclick="toggleDropdown()"
+                                class="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white pl-3 pr-3 py-2 rounded-xl font-semibold transition-colors text-sm">
                             <div class="w-6 h-6 bg-white/25 rounded-full flex items-center justify-center text-xs font-bold">
                                 {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                             </div>
@@ -96,7 +96,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
                             </svg>
                         </button>
-                        <div class="dropdown-menu absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 opacity-0 invisible z-50 overflow-hidden">
+                        <div id="userDropdown"
+                             class="hidden absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden">
                             <div class="px-4 py-3 bg-green-50 border-b border-green-100">
                                 <p class="text-xs text-green-600 font-medium">Masuk sebagai</p>
                                 <p class="text-sm font-semibold text-gray-800 truncate">{{ auth()->user()->name }}</p>
@@ -106,9 +107,14 @@
                                     Panel Admin
                                 </a>
                             @endif
+                            <a href="{{ route('profile.show') }}" class="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors">
+                                Profil Saya
+                            </a>
+                            @if(!auth()->user()->isAdmin())
                             <a href="{{ route('orders.history') }}" class="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors">
                                 Riwayat Pesanan
                             </a>
+                            @endif
                             <div class="border-t border-gray-100">
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
@@ -145,7 +151,8 @@
         </div>
     </div>
 
-    {{-- Category Nav --}}
+    {{-- Category Nav — hanya untuk non-admin --}}
+    @if(!auth()->check() || !auth()->user()->isAdmin())
     <div class="border-t border-gray-100 bg-white hidden md:block">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex items-center gap-1 py-2 overflow-x-auto">
@@ -165,11 +172,12 @@
             </div>
         </div>
     </div>
+    @endif
 </nav>
 
 {{-- Flash Messages --}}
 @if(session('success'))
-    <div class="max-w-7xl mx-auto px-4 mt-4 flash-msg">
+    <div id="flash-success" class="max-w-7xl mx-auto px-4 mt-4">
         <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-xl flex items-center gap-2 shadow-sm">
             <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
@@ -179,7 +187,7 @@
     </div>
 @endif
 @if(session('error'))
-    <div class="max-w-7xl mx-auto px-4 mt-4 flash-msg">
+    <div id="flash-error" class="max-w-7xl mx-auto px-4 mt-4">
         <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl flex items-center gap-2 shadow-sm">
             <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
@@ -210,7 +218,9 @@
                     <li><a href="{{ route('home') }}" class="hover:text-green-400 transition-colors">Beranda</a></li>
                     <li><a href="{{ route('products.index') }}" class="hover:text-green-400 transition-colors">Semua Produk</a></li>
                     @auth
+                    @if(!auth()->user()->isAdmin())
                     <li><a href="{{ route('orders.history') }}" class="hover:text-green-400 transition-colors">Riwayat Pesanan</a></li>
+                    @endif
                     @endauth
                 </ul>
             </div>
@@ -231,5 +241,32 @@
 </footer>
 
 @stack('scripts')
+<script>
+// Dropdown toggle
+function toggleDropdown() {
+    var dd = document.getElementById('userDropdown');
+    if (dd) dd.classList.toggle('hidden');
+}
+// Tutup dropdown kalau klik di luar
+document.addEventListener('click', function(e) {
+    var wrap = document.getElementById('userDropdownWrap');
+    var dd   = document.getElementById('userDropdown');
+    if (wrap && dd && !wrap.contains(e.target)) {
+        dd.classList.add('hidden');
+    }
+});
+
+// Auto remove flash messages setelah 4 detik
+['flash-success','flash-error'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) {
+        setTimeout(function() {
+            el.style.transition = 'opacity 0.4s ease';
+            el.style.opacity = '0';
+            setTimeout(function() { el.remove(); }, 400);
+        }, 4000);
+    }
+});
+</script>
 </body>
 </html>

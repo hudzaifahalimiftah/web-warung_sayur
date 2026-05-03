@@ -131,29 +131,53 @@
             </div>
             <h3 class="font-semibold text-slate-800 text-sm">Update Status Pesanan</h3>
         </div>
-        <form method="POST" action="{{ route('admin.orders.updateStatus', $order) }}" class="flex gap-3 items-center">
-            @csrf @method('PATCH')
-            <select name="status"
-                    class="flex-1 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition">
-                @foreach([
-                    'pending'    => 'Menunggu Konfirmasi',
-                    'confirmed'  => 'Dikonfirmasi',
-                    'processing' => 'Sedang Diproses',
-                    'delivered'  => 'Sudah Dikirim',
-                    'cancelled'  => 'Dibatalkan',
-                ] as $val => $label)
-                    <option value="{{ $val }}" {{ $order->status === $val ? 'selected' : '' }}>{{ $label }}</option>
-                @endforeach
-            </select>
-            <button type="submit"
-                    class="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors"
-                    style="box-shadow:0 4px 12px rgba(22,163,74,.3)">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+
+        @if(in_array($order->status, ['completed', 'cancelled']))
+            {{-- Status final — tidak bisa diubah --}}
+            <div class="flex items-center gap-3 p-4 rounded-xl
+                {{ $order->status === 'completed' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200' }}">
+                <svg class="w-5 h-5 flex-shrink-0 {{ $order->status === 'completed' ? 'text-green-500' : 'text-red-400' }}"
+                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    @if($order->status === 'completed')
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    @else
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    @endif
                 </svg>
-                Update
-            </button>
-        </form>
+                <div>
+                    <p class="text-sm font-semibold {{ $order->status === 'completed' ? 'text-green-800' : 'text-red-700' }}">
+                        Pesanan {{ $order->status === 'completed' ? 'Selesai' : 'Dibatalkan' }}
+                    </p>
+                    <p class="text-xs {{ $order->status === 'completed' ? 'text-green-600' : 'text-red-500' }} mt-0.5">
+                        Status ini sudah final dan tidak dapat diubah lagi.
+                    </p>
+                </div>
+            </div>
+        @else
+            <form method="POST" action="{{ route('admin.orders.updateStatus', $order) }}" class="flex gap-3 items-center">
+                @csrf @method('PATCH')
+                <select name="status"
+                        class="flex-1 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition">
+                    @foreach([
+                        'pending'    => 'Menunggu Konfirmasi',
+                        'confirmed'  => 'Dikonfirmasi',
+                        'processing' => 'Sedang Diproses',
+                        'delivered'  => 'Sudah Dikirim',
+                        'completed'  => 'Selesai',
+                        'cancelled'  => 'Dibatalkan',
+                    ] as $val => $label)
+                        <option value="{{ $val }}" {{ $order->status === $val ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+                <button type="submit"
+                        class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors shadow-sm">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    Update
+                </button>
+            </form>
+        @endif
     </div>
 
 </div>

@@ -19,7 +19,7 @@
         {{-- Card --}}
         <div class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
             <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-8 py-5">
-                <h1 class="text-xl font-bold text-white">Buat Akun Baru 🌱</h1>
+                <h1 class="text-xl font-bold text-white">Buat Akun Baru</h1>
                 <p class="text-green-100 text-sm mt-0.5">Bergabung dan mulai belanja sayur segar</p>
             </div>
 

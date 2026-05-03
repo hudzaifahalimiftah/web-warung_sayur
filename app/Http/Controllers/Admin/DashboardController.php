@@ -16,7 +16,7 @@ class DashboardController extends Controller
             'pending_orders' => Order::where('status', 'pending')->count(),
             'total_products' => Product::count(),
             'total_users'    => User::where('role', 'user')->count(),
-            'revenue'        => Order::whereIn('status', ['confirmed', 'processing', 'delivered'])->sum('total_price'),
+            'revenue' => Order::whereIn('status', ['confirmed', 'processing', 'delivered', 'completed'])->sum('total_price'),
         ];
 
         $recentOrders = Order::with('user')

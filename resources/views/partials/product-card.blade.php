@@ -64,7 +64,7 @@
             <button disabled class="w-full bg-gray-100 text-gray-400 text-xs font-medium py-2 rounded-xl cursor-not-allowed">
                 Stok Habis
             </button>
-        @elseif(auth()->check())
+        @elseif(auth()->check() && !auth()->user()->isAdmin())
             <form action="{{ route('cart.add') }}" method="POST">
                 @csrf
                 <input type="hidden" name="product_id" value="{{ $product->id }}">
@@ -74,6 +74,20 @@
                     + Keranjang
                 </button>
             </form>
+            <form action="{{ route('buy.now') }}" method="POST" class="mt-1.5">
+                @csrf
+                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                <input type="hidden" name="quantity" value="1">
+                <button type="submit"
+                        class="w-full border border-green-600 text-green-600 hover:bg-green-50 text-xs font-semibold py-2 rounded-xl transition-all">
+                    Beli Sekarang
+                </button>
+            </form>
+        @elseif(auth()->check() && auth()->user()->isAdmin())
+            <a href="{{ route('products.show', $product) }}"
+               class="block w-full text-center bg-gray-100 text-gray-500 text-xs font-medium py-2 rounded-xl">
+                Lihat Detail
+            </a>
         @else
             <a href="{{ route('login') }}"
                class="block w-full text-center bg-green-600 hover:bg-green-700 text-white text-xs font-semibold py-2 rounded-xl transition-colors">

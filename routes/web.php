@@ -5,7 +5,9 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin;
+use App\Http\Controllers\Admin\ReportController;
 use Illuminate\Support\Facades\Route;
 
 // ─── Public Routes ───────────────────────────────────────────────────────────
@@ -25,11 +27,21 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 
 // ─── Authenticated User Routes ────────────────────────────────────────────────
 Route::middleware('auth')->group(function () {
+    // Profile
+    Route::get('/profil', [ProfileController::class, 'show'])->name('profile.show');
+    Route::put('/profil', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profil/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+
     // Cart
     Route::get('/keranjang', [CartController::class, 'index'])->name('cart.index');
     Route::post('/keranjang/tambah', [CartController::class, 'add'])->name('cart.add');
     Route::patch('/keranjang/{cart}', [CartController::class, 'update'])->name('cart.update');
     Route::delete('/keranjang/{cart}', [CartController::class, 'remove'])->name('cart.remove');
+
+    // Beli Sekarang (langsung ke checkout tanpa keranjang)
+    Route::post('/beli-sekarang', [OrderController::class, 'buyNow'])->name('buy.now');
+    Route::get('/beli-sekarang/checkout', [OrderController::class, 'checkoutBuyNow'])->name('orders.checkout.buynow');
+    Route::post('/beli-sekarang/proses', [OrderController::class, 'storeBuyNow'])->name('orders.store.buynow');
 
     // Orders
     Route::get('/checkout', [OrderController::class, 'checkout'])->name('orders.checkout');
@@ -61,4 +73,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/pesanan', [Admin\OrderController::class, 'index'])->name('orders.index');
     Route::get('/pesanan/{order}', [Admin\OrderController::class, 'show'])->name('orders.show');
     Route::patch('/pesanan/{order}/status', [Admin\OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+
+    // Reports
+    Route::get('/laporan', [Admin\ReportController::class, 'index'])->name('reports.index');
 });

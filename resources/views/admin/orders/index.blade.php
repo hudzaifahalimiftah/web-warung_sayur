@@ -7,12 +7,13 @@
 <div class="flex items-center gap-2 mb-5 flex-wrap">
     @php
         $statuses = [
-            ''           => ['label' => 'Semua',      'color' => ''],
-            'pending'    => ['label' => 'Menunggu',   'color' => 'amber'],
-            'confirmed'  => ['label' => 'Dikonfirmasi','color' => 'blue'],
-            'processing' => ['label' => 'Diproses',   'color' => 'violet'],
-            'delivered'  => ['label' => 'Dikirim',    'color' => 'emerald'],
-            'cancelled'  => ['label' => 'Dibatalkan', 'color' => 'red'],
+            ''           => ['label' => 'Semua'],
+            'pending'    => ['label' => 'Menunggu'],
+            'confirmed'  => ['label' => 'Dikonfirmasi'],
+            'processing' => ['label' => 'Diproses'],
+            'delivered'  => ['label' => 'Dikirim'],
+            'completed'  => ['label' => 'Selesai'],
+            'cancelled'  => ['label' => 'Dibatalkan'],
         ];
         $current = request('status', '');
     @endphp
@@ -69,7 +70,8 @@
                         <td class="px-6 py-3.5">
                             @php
                                 $badge = match($order->status) {
-                                    'delivered'  => 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200',
+                                    'completed'  => 'bg-green-50 text-green-700 ring-1 ring-green-200',
+                                    'delivered'  => 'bg-cyan-50 text-cyan-700 ring-1 ring-cyan-200',
                                     'cancelled'  => 'bg-red-50 text-red-600 ring-1 ring-red-200',
                                     'pending'    => 'bg-amber-50 text-amber-700 ring-1 ring-amber-200',
                                     'confirmed'  => 'bg-blue-50 text-blue-700 ring-1 ring-blue-200',
