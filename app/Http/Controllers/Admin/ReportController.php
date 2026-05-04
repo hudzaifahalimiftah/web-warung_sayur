@@ -15,8 +15,8 @@ class ReportController extends Controller
         $year  = $request->get('year', date('Y'));
         $month = $request->get('month', date('m'));
 
-        // Pemasukan per hari — semua pesanan kecuali cancelled
-        $dailyRevenue = Order::whereNotIn('status', ['cancelled'])
+        // Pemasukan per hari — hanya confirmed ke atas
+        $dailyRevenue = Order::whereIn('status', ['confirmed', 'processing', 'delivered', 'completed'])
             ->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
             ->select(
