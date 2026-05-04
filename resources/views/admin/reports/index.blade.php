@@ -55,7 +55,7 @@
                 </svg>
             </div>
             <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-                {{ now()->translatedFormat('l') }}
+                {{ now()->format('l') }}
             </span>
         </div>
         <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-1">Pemasukan Hari Ini</p>
@@ -186,7 +186,7 @@
                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 animate-pulse"></span>
                                 @endif
                                 <span class="font-medium text-slate-700 text-xs">
-                                    {{ \Carbon\Carbon::create($year, $month, $d)->translatedFormat('l, d F Y') }}
+                                    {{ \Carbon\Carbon::create($year, $month, $d)->format('l, d F Y') }}
                                 </span>
                                 @if($isToday)
                                     <span class="text-[10px] font-bold text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded-full">Hari ini</span>

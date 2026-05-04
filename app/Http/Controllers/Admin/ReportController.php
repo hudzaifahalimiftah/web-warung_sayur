@@ -76,7 +76,7 @@ class ReportController extends Controller
             $availableYears = [date('Y')];
         }
 
-        $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+        $daysInMonth = (int) \Carbon\Carbon::create($year, $month, 1)->daysInMonth;
 
         return view('admin.reports.index', compact(
             'dailyRevenue', 'monthlyRevenue', 'monthlyOrders',
