@@ -132,21 +132,22 @@ class CategoryProductSeeder extends Seeder
         ];
 
         foreach ($data as $cat) {
-            $category = Category::create([
-                'category_name' => $cat['name'],
-                'slug'          => Str::slug($cat['name']),
-            ]);
+            $category = Category::firstOrCreate(
+                ['slug' => \Illuminate\Support\Str::slug($cat['name'])],
+                ['category_name' => $cat['name']]
+            );
 
-            foreach ($cat['products'] as $p) {
-                Product::create([
-                    'category_id'  => $category->id,
-                    'product_name' => $p['name'],
-                    'description'  => $p['desc'],
-                    'price'        => $p['price'],
-                    'unit'         => $p['unit'],
-                    'stock'        => $p['stock'],
-                    'image'        => $p['image'], // URL Unsplash langsung
-                ]);
+        foreach ($cat['products'] as $p) {
+                Product::firstOrCreate(
+                    ['product_name' => $p['name'], 'category_id' => $category->id],
+                    [
+                        'description'  => $p['desc'],
+                        'price'        => $p['price'],
+                        'unit'         => $p['unit'],
+                        'stock'        => $p['stock'],
+                        'image'        => $p['image'],
+                    ]
+                );
             }
         }
     }
