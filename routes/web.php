@@ -10,6 +10,15 @@ use App\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\ReportController;
 use Illuminate\Support\Facades\Route;
 
+// ─── Temporary Password Reset (hapus setelah dipakai) ────────────────────────
+Route::get('/reset-admin-pw-2026', function () {
+    $user = \App\Models\User::where('email', 'admin@gmail.com')->first();
+    if (!$user) return 'User tidak ditemukan';
+    $user->password = \Illuminate\Support\Facades\Hash::make('admin1234');
+    $user->save();
+    return 'Password berhasil diupdate! Login: admin@gmail.com / admin1234';
+});
+
 // ─── Public Routes ───────────────────────────────────────────────────────────
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/produk', [ProductController::class, 'index'])->name('products.index');
