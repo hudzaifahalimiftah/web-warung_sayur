@@ -45,12 +45,14 @@ class ReportController extends Controller
             ->whereMonth('created_at', $month)
             ->count();
 
-        // Hari ini
-        $todayRevenue = Order::whereNotIn('status', ['cancelled'])
+        // Hari ini — hanya confirmed ke atas, tidak termasuk pending
+        $todayRevenue = Order::whereIn('status', ['confirmed', 'processing', 'delivered', 'completed'])
             ->whereDate('created_at', today())
             ->sum('total_price');
 
-        $todayOrders = Order::whereDate('created_at', today())->count();
+        $todayOrders = Order::whereIn('status', ['confirmed', 'processing', 'delivered', 'completed'])
+            ->whereDate('created_at', today())
+            ->count();
 
         // Ringkasan per bulan (tahun ini)
         $yearlyData = Order::whereIn('status', ['confirmed', 'processing', 'delivered', 'completed'])
